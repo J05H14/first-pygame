@@ -3,8 +3,8 @@ import sys
 
 pygame.init()
 
-width = 600
-height = 720
+width = 800
+height = 800
 
 size = (width, height)
 
@@ -16,7 +16,7 @@ square = pygame.image.load("square.png")
 
 squareRect = square.get_rect()
 
-speed = [1, 2]
+speed = [50, 100]
 
 while True:
 
