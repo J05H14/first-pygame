@@ -1,5 +1,6 @@
 import pygame
 import sys
+from pygame import *
 
 pygame.init()
 
@@ -13,33 +14,92 @@ background_color = (0, 0, 100)
 screen = pygame.display.set_mode(size)
 
 ball = pygame.image.load("square.png")
-ball2 = pygame.image.load("ball.png")
+enemy = pygame.image.load("ball.png")
+proj = pygame.transform.scale(ball, (25, 25))
 
 ballRect = ball.get_rect()
-ball2Rect = ball2.get_rect()
+projRect = proj.get_rect()
+projRect.center = (-300, -300)
 
-speed = [25, 50]
-speed2 = [30, 10]
+speed = [2, 0]
+speed2 = [2, 0]
+
+ballRect.move_ip(0, height - ballRect.bottom)
+
+
+enemy = pygame.transform.scale(enemy, (100, 100))
+
+enemies = []
+enemyNum = 0
+
+for i in range(5):
+    newEnemy = enemy.get_rect()
+    newEnemy.move_ip(enemyNum * 110, 0)
+    enemies.append(newEnemy)
+    enemyNum += 1
+
+def enemyUpdate():
+    speed2[0] = -speed2[0]
+    for i in enemies:
+        i.move_ip(0,25)
+
+def hit():
+    for i in enemies:
+        if projRect.colliderect(i):
+            enemies.remove(i)
+
+key.set_repeat(1, 1)
 
 while True:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
 
-    ballRect = ballRect.move(speed)
-    ball2Rect = ball2Rect.move(speed2)
+        if event.type == KEYDOWN:
+            if event.key == K_RIGHT and ballRect.right < width:
+                ballRect = ballRect.move(speed[0], speed[1])
+            if event.key == K_LEFT and ballRect.left < width:
+                ballRect = ballRect.move(-speed[0], -speed[1])
+            if event.key == K_SPACE:
+                projRect.center = ballRect.center
 
-    if ballRect.left < 0 or ballRect.right > width:
-        speed[0] = -speed[0]
-    if ballRect.top < 0 or ballRect.bottom > height:
-        speed[1] = -speed[1]
+    projRect.top -= 5
 
-    if ball2Rect.left < 0 or ball2Rect.right > width:
-        speed2[0] = -speed2[0]
-    if ball2Rect.top < 0 or ball2Rect.bottom > height:
-        speed2[1] = -speed2[1]
+    hit()
+
+    if len(enemies) == 0:
+        break
+
+    leftMost = enemies[0]
+    rightMost = enemies[len(enemies) - 1]
+
+    if leftMost.left < 0 or rightMost.right > width:
+        enemyUpdate()
 
     screen.fill(background_color)
     screen.blit(ball, ballRect)
-    screen.blit(ball2, ball2Rect)
+
+    for i in range (len(enemies)):
+        enemies[i] = enemies[i].move(speed2)
+        screen.blit(enemy, enemies[i])
+
+
+
+    screen.blit(proj, projRect)
     pygame.display.flip()
+
+if len(enemies) == 0:
+    winWidth = 559
+    winHeight = 420
+    win = pygame.image.load("win.jpg")
+    winRect = win.get_rect()
+
+    winSize = (winWidth, winHeight)
+    winScreen = pygame.display.set_mode(winSize)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit()
+
+        screen.blit(win, winRect)
+        pygame.display.flip()
